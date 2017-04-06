@@ -39,18 +39,16 @@ void mat_show(matrix m)
 
 matrix mat_copy(matrix M)
 {
-	uint8_t i, j;
-	matrix COPY;
-	COPY.row = M.row;
-	COPY.col = M.col;
+	matrix COPY_M;
+	COPY_M.row = M.row;
+	COPY_M.col = M.col;
 
-	COPY.mat = (double **)malloc(COPY.row * sizeof(double *));
-	for (i = 0; i < COPY.row; i++)
+	COPY_M.mat = (double **)malloc(M.row * sizeof(double *));
+	for (uint8_t i = 0; i < M.row; i++)
 	{
-		COPY.mat[i] = (double *)malloc(COPY.col * sizeof(double));
-		for (j = 0; j < COPY.col; j++) COPY.mat[i][j] = M.mat[i][j];
+		memcpy(COPY_M.mat[i], M.mat[i], M.col * sizeof(double));
 	}
-	return COPY;
+	return COPY_M;
 }
 
 void mat_delete(matrix M)
@@ -165,16 +163,15 @@ matrix mat_calc(matrix A, matrix B, CALC_OPERATOR operator) //矩阵对应元素
 		ERROR_Handler("Tow matrixs must have the same size!");
 	}
 
-	uint8_t i, j;
 	matrix C;
 	C.row = A.row;
 	C.col = A.col;
 	C.mat = (double **)malloc(C.row * sizeof(double *));
 
-	for (i = 0; i < C.row; i++)
+	for (uint8_t i = 0; i < C.row; i++)
 	{
 		C.mat[i] = (double *)malloc(C.col * sizeof(double));
-		for (j = 0; j < C.col; j++)
+		for (uint8_t j = 0; j < C.col; j++)
 		{
 			switch (operator)
 			{
@@ -196,18 +193,17 @@ matrix mat_mul(matrix A, matrix B) //矩阵相乘
 		ERROR_Handler("Tow matrix's size not match!");
 	}
 
-	uint8_t i, j, k;
 	matrix C;
 	C.row = A.row;
 	C.col = B.col;
 	C.mat = (double **)malloc(C.row * sizeof(double *));
 
-	for (i = 0; i < C.row; i++)
+	for (uint8_t i = 0; i < C.row; i++)
 	{
 		C.mat[i] = (double *)malloc(C.col * sizeof(double));
-		for (j = 0; j < C.col; j++)
+		for (uint8_t j = 0; j < C.col; j++)
 		{
-			for (k = 0; k < A.col; k++) C.mat[i][j] += A.mat[i][k] * B.mat[k][j];
+			for (uint8_t k = 0; k < A.col; k++) C.mat[i][j] += A.mat[i][k] * B.mat[k][j];
 		}
 	}
 
@@ -216,16 +212,15 @@ matrix mat_mul(matrix A, matrix B) //矩阵相乘
 
 matrix trans(matrix M) //矩阵转置
 {
-	uint8_t i, j;
 	matrix C;
 	C.row = M.col;
 	C.col = M.row;
 	C.mat = (double **)malloc(C.row * sizeof(double *));
 
-	for (i = 0; i < C.row; i++)
+	for (uint8_t i = 0; i < C.row; i++)
 	{
 		C.mat[i] = (double *)malloc(C.col * sizeof(double));
-		for (j = 0; j < C.col; j++)
+		for (uint8_t j = 0; j < C.col; j++)
 		{
 			C.mat[i][j] = M.mat[j][i];
 		}
@@ -302,32 +297,32 @@ vector jacobi(matrix A, vector b)
 		ERROR_Handler("size doesn't match!");
 	}
 
-/*
-	matrix B;
-	B.row = A.row, B.col = A.col;
-	B.mat = (double**)malloc(B.row * sizeof(double*));
-
-	for (uint8_t i = 0; i < B.row; i++)
-	{
-		B.mat[i] = (double*)malloc(B.col * sizeof(double));
-
-		for (uint8_t j = 0; j < B.col; j++)
-		{
-			B.mat[i][j] = -A.mat[i][j] / A.mat[i][i];
-		}
-		B.mat[i][i] = 0.0;
-	}
-
 	
-		mat_show(B);
+		matrix B;
+		B.row = A.row, B.col = A.col;
+		B.mat = (double**)malloc(B.row * sizeof(double*));
 
-		if(norm(B,NORM_TYPE_INF) >= 1.0)
+		for (uint8_t i = 0; i < B.row; i++)
 		{
-			ERROR_Handler("woops! This gonna take me forever!");
+			B.mat[i] = (double*)malloc(B.col * sizeof(double));
+
+			for (uint8_t j = 0; j < B.col; j++)
+			{
+				B.mat[i][j] = -A.mat[i][j] / A.mat[i][i];
+			}
+			B.mat[i][i] = 0.0;
 		}
 
-		mat_delete(B);
-*/
+
+			mat_show(B);
+
+			if(norm(B,NORM_TYPE_INF) >= 1.0)
+			{
+				ERROR_Handler("woops! This gonna take me forever!");
+			}
+
+			mat_delete(B);
+	
 
 	vector x, temp;
 	x.len = b.len; temp.len = b.len;
@@ -335,7 +330,7 @@ vector jacobi(matrix A, vector b)
 	x.vec = (double*)malloc(x.len * sizeof(double));
 	temp.vec = (double*)malloc(temp.len * sizeof(double));
 
-	memset(temp.vec, 0.0, x.len * sizeof(double));
+	memset(temp.vec, 0, x.len * sizeof(double));
 
 	double norm;
 	uint8_t count = 0;

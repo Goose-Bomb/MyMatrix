@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "*.cfg": "ini",
-        "utility": "cpp",
-        "cstdlib": "cpp",
-        "initializer_list": "cpp"
-    }
-}
