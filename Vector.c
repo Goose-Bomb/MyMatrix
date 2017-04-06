@@ -40,6 +40,11 @@ double dot(vector A, vector B)
 	return result;
 }
 
+double angle(vector x, vector y)
+{
+	return acos(dot(x, y) / vec_norm(x, NORM_TYPE_2) / vec_norm(y, NORM_TYPE_2));
+}
+
 vector cross(vector A, vector B)
 {
 	if (A.len != 3 || B.len != 3)
@@ -73,10 +78,10 @@ vector vec_calc(vector A, vector B, CALC_OPERATOR operator)
 	{
 		switch (operator)
 		{
-			case ADD: C.vec[i] = A.vec[i] + B.vec[i]; break;
-			case SUB: C.vec[i] = A.vec[i] - B.vec[i]; break;
-			case MUL: C.vec[i] = A.vec[i] * B.vec[i]; break;
-			case DIV: C.vec[i] = A.vec[i] / B.vec[i]; break;
+		case ADD: C.vec[i] = A.vec[i] + B.vec[i]; break;
+		case SUB: C.vec[i] = A.vec[i] - B.vec[i]; break;
+		case MUL: C.vec[i] = A.vec[i] * B.vec[i]; break;
+		case DIV: C.vec[i] = A.vec[i] / B.vec[i]; break;
 		}
 	}
 
@@ -105,8 +110,26 @@ vector vec_abs(vector x)
 	abs_x.len = x.len;
 	abs_x.vec = (double*)malloc(abs_x.len * sizeof(double));
 
-	uint32_t i;
-	for (i = 0; i < abs_x.len; i++) abs_x.vec[i] = fabs(x.vec[i]);
-
+	for (uint32_t i = 0; i < abs_x.len; i++) abs_x.vec[i] = fabs(x.vec[i]);
 	return abs_x;
+}
+
+double vec_norm(vector x, NORM_TYPE type)
+{
+	double norm = 0.0;
+
+	switch (type)
+	{
+	case NORM_TYPE_1:
+		for (uint32_t i = 0; i < x.len; norm += fabs(x.vec[i++]));
+		return norm;
+
+	case NORM_TYPE_2:
+		for (uint32_t i = 0; i < x.len; norm += pow2(x.vec[i++]));
+		return sqrt(norm);
+
+	case NORM_TYPE_INF:
+		for (uint32_t i = 0; i < x.len; norm = __max(norm, fabs(x.vec[i++])));
+		return norm;
+	}
 }

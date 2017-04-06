@@ -9,10 +9,12 @@ typedef struct {
 vector vec_input(void);
 void vec_show(vector);
 double dot(vector, vector);
+double angle(vector, vector);
 vector cross(vector, vector);
 vector vec_calc(vector, vector, CALC_OPERATOR);
 vector vec_abs(vector);
 double vec_max(vector);
 double vec_min(vector);
+double vec_norm(vector);
 
 

@@ -2,36 +2,35 @@
 
 matrix mat_input(void)
 {
-	uint8_t i, j;
-	matrix m;
+	matrix M;
 
 	puts("Please input the size of the Matrix : [rows, cols]");
-	scanf("%d%d", &m.row, &m.col);
+	scanf("%d%d", &M.row, &M.col);
 
-	printf("Please input the elements of the %d * %d Matrix\n", m.row, m.col);
+	printf("Please input the elements of the %d * %d Matrix\n", M.row, M.col);
 
-	m.mat = (double **)malloc(m.row * sizeof(double *));
-	for (i = 0; i < m.row; i++)
+	M.mat = (double **)malloc(M.row * sizeof(double *));
+	for (uint8_t i = 0; i < M.row; i++)
 	{
-		m.mat[i] = (double *)malloc(m.col * sizeof(double));
-		for (j = 0; j < m.col; j++)
+		M.mat[i] = (double *)malloc(M.col * sizeof(double));
+		for (uint8_t j = 0; j < M.col; j++)
 		{
-			scanf("%lf", &m.mat[i][j]);
+			scanf("%lf", &M.mat[i][j]);
 		}
 	}
 
-	return m;
+	return M;
 }
 
-void mat_show(matrix m)
+void mat_show(matrix M)
 {
 	putchar('\n');
 	uint8_t i, j;
-	for (i = 0; i < m.row; i++)
+	for (i = 0; i < M.row; i++)
 	{
-		for (j = 0; j < m.col; j++)
+		for (j = 0; j < M.col; j++)
 		{
-			printf("%g ", m.mat[i][j]);
+			printf("%g ", M.mat[i][j]);
 		}
 		putchar('\n');
 	}
@@ -235,14 +234,13 @@ double trace(matrix M) //矩阵的迹
 		ERROR_Handler("Not square matrix!");
 	}
 
-	uint8_t i;
 	double trace = 0.0;
-	for (i = 0; i < M.row; i++) trace += M.mat[i][i];
+	for (uint8_t i = 0; i < M.row; i++) trace += M.mat[i][i];
 	return trace;
 }
 
 //返回矩阵范数
-double norm(matrix m, NORM_TYPE type)
+double norm(matrix M, NORM_TYPE type)
 {
 	uint8_t i, j;
 	double norm = 0.0, sum = 0.0;
@@ -250,34 +248,34 @@ double norm(matrix m, NORM_TYPE type)
 	switch (type)
 	{
 	case NORM_TYPE_1:
-		for (j = 0; j < m.col; j++)
+		for (j = 0; j < M.col; j++)
 		{
 			sum = 0.0;
-			for (i = 0; i < m.row; i++)
+			for (i = 0; i < M.row; i++)
 			{
-				sum += fabs(m.mat[i][j]);
+				sum += fabs(M.mat[i][j]);
 			}
 			norm = __max(norm, sum);
 		}
 		return norm;
 
 	case NORM_TYPE_INF:
-		for (i = 0; i < m.row; i++)
+		for (i = 0; i < M.row; i++)
 		{
 			sum = 0.0;
-			for (j = 0; j < m.col; j++)
+			for (j = 0; j < M.col; j++)
 			{
-				sum += fabs(m.mat[i][j]);
+				sum += fabs(M.mat[i][j]);
 			}
 			norm = __max(norm, sum);
 		}
 		return norm;
 
 	case NORM_TYPE_FRO:
-		for (i = 0; i < m.row; i++)
-			for (j = 0; j < m.col; j++)
+		for (i = 0; i < M.row; i++)
+			for (j = 0; j < M.col; j++)
 			{
-				sum += m.mat[i][j] * m.mat[i][j];
+				sum += M.mat[i][j] * M.mat[i][j];
 			}
 		return sqrt(sum);
 
@@ -297,32 +295,32 @@ vector jacobi(matrix A, vector b)
 		ERROR_Handler("size doesn't match!");
 	}
 
-	
-		matrix B;
-		B.row = A.row, B.col = A.col;
-		B.mat = (double**)malloc(B.row * sizeof(double*));
 
-		for (uint8_t i = 0; i < B.row; i++)
+	matrix B;
+	B.row = A.row, B.col = A.col;
+	B.mat = (double**)malloc(B.row * sizeof(double*));
+
+	for (uint8_t i = 0; i < B.row; i++)
+	{
+		B.mat[i] = (double*)malloc(B.col * sizeof(double));
+
+		for (uint8_t j = 0; j < B.col; j++)
 		{
-			B.mat[i] = (double*)malloc(B.col * sizeof(double));
-
-			for (uint8_t j = 0; j < B.col; j++)
-			{
-				B.mat[i][j] = -A.mat[i][j] / A.mat[i][i];
-			}
-			B.mat[i][i] = 0.0;
+			B.mat[i][j] = -A.mat[i][j] / A.mat[i][i];
 		}
+		B.mat[i][i] = 0.0;
+	}
 
 
-			mat_show(B);
+	mat_show(B);
 
-			if(norm(B,NORM_TYPE_INF) >= 1.0)
-			{
-				ERROR_Handler("woops! This gonna take me forever!");
-			}
+	if (norm(B, NORM_TYPE_INF) >= 1.0)
+	{
+		ERROR_Handler("woops! This gonna take me forever!");
+	}
 
-			mat_delete(B);
-	
+	mat_delete(B);
+
 
 	vector x, temp;
 	x.len = b.len; temp.len = b.len;
