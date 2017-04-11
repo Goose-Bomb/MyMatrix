@@ -7,7 +7,8 @@
 #include<stdint.h>
 #include<float.h>
 
-#define EPS 1e-6
+#define EPS 5e-6
+#define POW2(X) (X)*(X)
 
 typedef enum{
     ADD, SUB, MUL, DIV
@@ -21,4 +22,3 @@ typedef enum {
 }NORM_TYPE;
 
 void ERROR_Handler(char*);
-double pow2(double);

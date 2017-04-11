@@ -125,7 +125,7 @@ double vec_norm(vector x, NORM_TYPE type)
 		return norm;
 
 	case NORM_TYPE_2:
-		for (uint32_t i = 0; i < x.len; norm += pow2(x.vec[i++]));
+		for (uint32_t i = 0; i < x.len; norm += POW2(x.vec[i++]));
 		return sqrt(norm);
 
 	case NORM_TYPE_INF:

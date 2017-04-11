@@ -9,10 +9,10 @@ matrix mat_input(void)
 
 	printf("Please input the elements of the %d * %d Matrix\n", M.row, M.col);
 
-	M.mat = (double **)malloc(M.row * sizeof(double *));
+	M.mat = (double **)calloc(M.row, sizeof(double*));
 	for (uint8_t i = 0; i < M.row; i++)
 	{
-		M.mat[i] = (double *)malloc(M.col * sizeof(double));
+		M.mat[i] = (double *)calloc(M.col, sizeof(double));
 		for (uint8_t j = 0; j < M.col; j++)
 		{
 			scanf("%lf", &M.mat[i][j]);
@@ -42,7 +42,7 @@ matrix mat_copy(matrix M)
 	COPY_M.row = M.row;
 	COPY_M.col = M.col;
 
-	COPY_M.mat = (double **)malloc(M.row * sizeof(double *));
+	COPY_M.mat = (double **)calloc(M.row, sizeof(double *));
 	for (uint8_t i = 0; i < M.row; i++)
 	{
 		memcpy(COPY_M.mat[i], M.mat[i], M.col * sizeof(double));
@@ -63,10 +63,10 @@ matrix eye(uint8_t n)
 	I.row = n;
 	I.col = n;
 
-	I.mat = (double **)malloc(n * sizeof(double *));
+	I.mat = (double **)calloc(n, sizeof(double *));
 	for (uint8_t i = 0; i < n; i++)
 	{
-		I.mat[i] = (double *)malloc(n * sizeof(double));
+		I.mat[i] = (double *)calloc(n, sizeof(double));
 		I.mat[i][i] = 1.0;
 	}
 
@@ -165,11 +165,11 @@ matrix mat_calc(matrix A, matrix B, CALC_OPERATOR operator) //矩阵对应元素
 	matrix C;
 	C.row = A.row;
 	C.col = A.col;
-	C.mat = (double **)malloc(C.row * sizeof(double *));
+	C.mat = (double **)calloc(C.row, sizeof(double *));
 
 	for (uint8_t i = 0; i < C.row; i++)
 	{
-		C.mat[i] = (double *)malloc(C.col * sizeof(double));
+		C.mat[i] = (double *)calloc(C.col, sizeof(double));
 		for (uint8_t j = 0; j < C.col; j++)
 		{
 			switch (operator)
@@ -195,11 +195,11 @@ matrix mat_mul(matrix A, matrix B) //矩阵相乘
 	matrix C;
 	C.row = A.row;
 	C.col = B.col;
-	C.mat = (double **)malloc(C.row * sizeof(double *));
+	C.mat = (double **)calloc(C.row, sizeof(double *));
 
 	for (uint8_t i = 0; i < C.row; i++)
 	{
-		C.mat[i] = (double *)malloc(C.col * sizeof(double));
+		C.mat[i] = (double *)calloc(C.col, sizeof(double));
 		for (uint8_t j = 0; j < C.col; j++)
 		{
 			for (uint8_t k = 0; k < A.col; k++) C.mat[i][j] += A.mat[i][k] * B.mat[k][j];
@@ -214,11 +214,11 @@ matrix trans(matrix M) //矩阵转置
 	matrix C;
 	C.row = M.col;
 	C.col = M.row;
-	C.mat = (double **)malloc(C.row * sizeof(double *));
+	C.mat = (double **)calloc(C.row, sizeof(double *));
 
 	for (uint8_t i = 0; i < C.row; i++)
 	{
-		C.mat[i] = (double *)malloc(C.col * sizeof(double));
+		C.mat[i] = (double *)calloc(C.col, sizeof(double));
 		for (uint8_t j = 0; j < C.col; j++)
 		{
 			C.mat[i][j] = M.mat[j][i];
@@ -295,14 +295,14 @@ vector jacobi(matrix A, vector b)
 		ERROR_Handler("size doesn't match!");
 	}
 
-
+	/* Well It's really unnecessary to calculate the iterative matrix
 	matrix B;
 	B.row = A.row, B.col = A.col;
-	B.mat = (double**)malloc(B.row * sizeof(double*));
+	B.mat = (double**)calloc(B.row, sizeof(double*));
 
 	for (uint8_t i = 0; i < B.row; i++)
 	{
-		B.mat[i] = (double*)malloc(B.col * sizeof(double));
+		B.mat[i] = (double*)calloc(B.col, sizeof(double));
 
 		for (uint8_t j = 0; j < B.col; j++)
 		{
@@ -319,21 +319,19 @@ vector jacobi(matrix A, vector b)
 		ERROR_Handler("woops! This gonna take me forever!");
 	}
 
-	mat_delete(B);
+	mat_delete(B);*/
 
 
 	vector x, temp;
 	x.len = b.len; temp.len = b.len;
 
-	x.vec = (double*)malloc(x.len * sizeof(double));
-	temp.vec = (double*)malloc(temp.len * sizeof(double));
+	x.vec = (double*)calloc(x.len, sizeof(double));
+	temp.vec = (double*)calloc(temp.len, sizeof(double));
 
-	memset(temp.vec, 0, x.len * sizeof(double));
-
-	double norm;
+	double norm, pre_norm = DBL_MAX;
 	uint8_t count = 0;
 
-	do
+	for (;;)
 	{
 		norm = 0.0;
 
@@ -349,12 +347,14 @@ vector jacobi(matrix A, vector b)
 			x.vec[i] += A.mat[i][i] * temp.vec[i] + b.vec[i];
 			x.vec[i] /= A.mat[i][i];
 
-			norm += pow2(x.vec[i] - temp.vec[i]);
+			norm += POW2(x.vec[i] - temp.vec[i]);
 		}
 
-		memcpy(temp.vec, x.vec, x.len * sizeof(double));
+		if (sqrt(norm) <= EPS || count++ >= 100) break;
 
-	} while (sqrt(norm) > EPS && count++ < 100);
+		memcpy(temp.vec, x.vec, x.len * sizeof(double));
+		pre_norm = norm;
+	}
 
 	if (sqrt(norm) > EPS) puts("failed");
 
@@ -369,5 +369,37 @@ vector gauss_seidel(matrix A, vector b)
 		ERROR_Handler("size doesn't match!");
 	}
 
+	vector x;
+	x.len = b.len;
+	x.vec = (double*)calloc(x.len, sizeof(double));
 
+	double xi_temp, norm, pre_norm = DBL_MAX;
+	uint8_t count = 0;
+
+	for (;;)
+	{
+		norm = 0.0;
+
+		for (uint8_t i = 0; i < x.len; i++)
+		{
+			xi_temp = x.vec[i];
+			x.vec[i] = 0.0;
+
+			for (uint8_t j = 0; j < x.len; j++)
+			{
+				if (j == i) continue;
+				x.vec[i] -= A.mat[i][j] * x.vec[j];
+			}
+
+			x.vec[i] += b.vec[i];
+			x.vec[i] /= A.mat[i][i];
+			norm += POW2(x.vec[i] - xi_temp);
+		}
+		printf("%.6f\n", sqrt(norm));
+		if (norm >= pre_norm || sqrt(norm) <= EPS && count++ >= 100) break;
+		pre_norm = norm;
+	}
+
+	if (sqrt(norm) > EPS) puts("failed");
+	return x;
 }
